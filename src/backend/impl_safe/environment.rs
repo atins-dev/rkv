@@ -272,7 +272,8 @@ impl<'e> BackendEnvironment<'e> for EnvironmentImpl {
         // TOOD: don't reallocate `name`.
         let key = name.map(String::from);
         let mut dbs = self.dbs.write().map_err(|_| ErrorImpl::EnvPoisonError)?;
-        if dbs.name_map.keys().filter_map(|k| k.as_ref()).count() >= self.max_dbs && name.is_some() {
+        if dbs.name_map.keys().filter_map(|k| k.as_ref()).count() >= self.max_dbs && name.is_some()
+        {
             return Err(ErrorImpl::DbsFull);
         }
         let parts = EnvironmentDbsRefMut::from(dbs.deref_mut());
@@ -282,6 +283,15 @@ impl<'e> BackendEnvironment<'e> for EnvironmentImpl {
             .entry(key)
             .or_insert_with(|| DatabaseImpl(arena.alloc(Database::new(Some(flags), None))));
         Ok(*id)
+    }
+
+    fn delete_store<S>(&self, name: Option<S>) -> Result<(), Self::Error>
+    where
+        S: ToString,
+    {
+        let mut dbs = self.dbs.write().map_err(|_| ErrorImpl::EnvPoisonError)?;
+        dbs.name_map.remove(&name.map(|s| s.to_string()));
+        Ok(())
     }
 
     fn begin_ro_txn(&'e self) -> Result<Self::RoTransaction, Self::Error> {

@@ -115,6 +115,13 @@ where
         self.open(name, opts).map(SingleStore::new)
     }
 
+    pub fn delete_store<S>(&self, name: Option<S>) -> Result<(), StoreError>
+    where
+        S: ToString,
+    {
+        self.env.delete_store(name).map_err(|e| e.into())
+    }
+
     /// Create or Open an existing database in (Integer -> Single Value) mode.
     /// Note: that create=true cannot be called concurrently with other operations so if
     /// you are sure that the database exists, call this with create=false.

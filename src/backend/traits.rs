@@ -107,6 +107,10 @@ pub trait BackendEnvironment<'e>: Debug {
         flags: Self::Flags,
     ) -> Result<Self::Database, Self::Error>;
 
+    fn delete_store<S>(&self, name: Option<S>) -> Result<(), Self::Error>
+    where
+        S: ToString;
+
     fn begin_ro_txn(&'e self) -> Result<Self::RoTransaction, Self::Error>;
 
     fn begin_rw_txn(&'e self) -> Result<Self::RwTransaction, Self::Error>;
